@@ -12,7 +12,102 @@ function formatDate(d: string | null): string {
   return new Date(d).toLocaleDateString('es-ES')
 }
 
+
+// ===== LOGIN COMPONENT =====
+function Login({ onLogin }: { onLogin: (user: any, token: string) => void }) {
+  const [email, setEmail] = useState('')
+  const [password, setPassword] = useState('')
+  const [error, setError] = useState('')
+  const [loading, setLoading] = useState(false)
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault()
+    setLoading(true); setError('')
+    try {
+      const res = await fetch(API_URL + '/api/auth/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, password })
+      })
+      const data = await res.json()
+      if (!res.ok) { setError(data.error || 'Error de conexión'); setLoading(false); return }
+      localStorage.setItem('maint_token', data.token)
+      localStorage.setItem('maint_user', JSON.stringify(data.user))
+      onLogin(data.user, data.token)
+    } catch { setError('Error de conexión al servidor') }
+    setLoading(false)
+  }
+  return (
+    <div className="min-h-screen flex items-center justify-center" style={{ background: 'linear-gradient(135deg, #abdee6 0%, #ffaf10 100%)' }}>
+      <div className="bg-white rounded-2xl shadow-2xl p-8 w-full max-w-md">
+        <div className="text-center mb-6">
+          <img src="https://res.cloudinary.com/dis5pcnfr/image/upload/v1769278425/IMG-20260111-WA0001_1_-removebg-preview_zzajxa.png" className="h-16 mx-auto mb-4" alt="Voltride" />
+          <h1 className="text-2xl font-bold text-gray-800">Maintenance Voltride</h1>
+          <p className="text-gray-500">Connectez-vous pour continuer</p>
+        </div>
+        <form onSubmit={handleSubmit} className="space-y-4">
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Email</label>
+            <input type="email" value={email} onChange={e => setEmail(e.target.value)} className="w-full px-4 py-3 border-2 rounded-xl" placeholder="votre@email.com" required />
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Contraseña</label>
+            <input type="password" value={password} onChange={e => setPassword(e.target.value)} className="w-full px-4 py-3 border-2 rounded-xl" placeholder="••••••••" required />
+          </div>
+          {error && <div className="bg-red-50 border border-red-200 rounded-lg p-3 text-red-600 text-sm">{error}</div>}
+          <button type="submit" disabled={loading} className="w-full py-3 text-white font-semibold rounded-xl disabled:opacity-50" style={{ background: 'linear-gradient(135deg, #abdee6 0%, #ffaf10 100%)' }}>
+            {loading ? 'Conexión...' : 'Iniciar sesión'}
+          </button>
+        </form>
+      </div>
+    </div>
+  )
+}
+
 export default function App() {
+  // ===== AUTH STATE =====
+  const [user, setUser] = useState<any>(null)
+  const [authToken, setAuthToken] = useState<string | null>(null)
+  const [authLoading, setAuthLoading] = useState(true)
+
+  useEffect(() => {
+    const urlParams = new URLSearchParams(window.location.search)
+    const urlToken = urlParams.get('token')
+    const savedToken = urlToken || localStorage.getItem('maint_token')
+    if (savedToken) {
+      fetch(API_URL + '/api/auth/me', { headers: { 'Authorization': 'Bearer ' + savedToken } })
+        .then(res => res.ok ? res.json() : Promise.reject())
+        .then(userData => {
+          setUser(userData); setAuthToken(savedToken)
+          localStorage.setItem('maint_token', savedToken)
+          localStorage.setItem('maint_user', JSON.stringify(userData))
+        })
+        .catch(() => { localStorage.removeItem('maint_token'); localStorage.removeItem('maint_user') })
+        .finally(() => setAuthLoading(false))
+    } else { setAuthLoading(false) }
+    if (urlToken) window.history.replaceState({}, '', window.location.pathname)
+  }, [])
+
+  const handleLogin = (userData: any, userToken: string) => { setUser(userData); setAuthToken(userToken) }
+  const handleLogout = () => {
+    localStorage.removeItem('maint_token'); localStorage.removeItem('maint_user')
+    setUser(null); setAuthToken(null); window.location.reload()
+  }
+
+  // ===== DÉCONNEXION AUTO 3H =====
+  useEffect(() => {
+    if (!user) return
+    let inactivityTimer: any
+    const TIMEOUT = 3 * 60 * 60 * 1000
+    const resetTimer = () => {
+      clearTimeout(inactivityTimer)
+      inactivityTimer = setTimeout(() => { alert('Sesión expirada por inactividad (3h)'); handleLogout() }, TIMEOUT)
+    }
+    const events = ['mousedown', 'keydown', 'touchstart', 'scroll']
+    events.forEach(e => window.addEventListener(e, resetTimer))
+    resetTimer()
+    return () => { clearTimeout(inactivityTimer); events.forEach(e => window.removeEventListener(e, resetTimer)) }
+  }, [user])
+
   const [page, setPage] = useState<'vehicles' | 'stock' | 'docs'>('vehicles')
   const [vehicles, setVehicles] = useState<any[]>([])
   const [inventory, setInventory] = useState<any[]>([])
@@ -307,12 +402,25 @@ export default function App() {
   const allChecked = checklist.every(c => c.checked)
   const lowStock = inventory.filter(p => p.quantityInStock <= p.minimumStock)
 
+  // Auth guards
+  if (authLoading) return (
+    <div className="min-h-screen flex items-center justify-center" style={{ background: 'linear-gradient(135deg, #abdee6 0%, #ffaf10 100%)' }}>
+      <div className="animate-spin w-12 h-12 border-4 border-white border-t-transparent rounded-full"></div>
+    </div>
+  )
+  if (!user) return <Login onLogin={handleLogin} />
+
   return (
     <div className="min-h-screen bg-gray-50">
       <div className="text-white p-4 shadow-lg" style={{background: 'linear-gradient(135deg, #abdee6, #ffaf10)'}}>
         <div className="flex items-center gap-3 mb-2">
           <img src="https://res.cloudinary.com/dis5pcnfr/image/upload/v1769278425/IMG-20260111-WA0001_1_-removebg-preview_zzajxa.png" alt="Voltride" className="h-8" />
           <h1 className="text-xl font-bold">Maintenance</h1>
+          <div className="ml-auto flex items-center gap-2">
+            <span className="text-sm">{user?.firstName}</span>
+            <button onClick={handleLogout} className="px-3 py-1 bg-red-500/80 hover:bg-red-600 text-white text-sm rounded transition">Salir</button>
+            <a href="https://trivium-launcher-production-a5c8.up.railway.app" className="text-white/70 hover:text-white text-sm">← Launcher</a>
+          </div>
         </div>
         <div className="flex gap-4">
           <button onClick={() => setPage('vehicles')} className={'text-sm font-medium pb-1 border-b-2 ' + (page === 'vehicles' ? 'border-white' : 'border-transparent opacity-70')}>Vehículos</button>
