@@ -233,7 +233,20 @@ export default function App() {
     setChecklist(defaultChecklist.map(c => ({ ...c })))
   }
 
-  useEffect(() => { loadVehicles(); loadInventory(); loadDocs() }, [])
+  useEffect(() => {
+    loadVehicles().then(() => {
+      // Auto-sélectionner véhicule si QR scan
+      const urlParams = new URLSearchParams(window.location.search)
+      const vehicleId = urlParams.get('vehicle')
+      if (vehicleId) {
+        fetch(API_URL + '/api/fleet/' + vehicleId)
+          .then(r => r.ok ? r.json() : null)
+          .then(v => { if (v) { setSelectedVehicle(v); setNote(v.maintenanceNotes || ''); setTab('info'); loadVehicleDetails(v) } })
+        window.history.replaceState({}, '', window.location.pathname)
+      }
+    })
+    loadInventory(); loadDocs()
+  }, [])
 
   const openVehicle = (v: any) => {
     setSelectedVehicle(v); setNote(v.maintenanceNotes || ''); setTab('info'); loadVehicleDetails(v)
