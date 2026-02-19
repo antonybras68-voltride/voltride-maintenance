@@ -310,9 +310,9 @@ export default function App() {
   return (
     <div className="min-h-screen bg-gray-50">
       <div className="bg-gradient-to-r from-orange-500 to-orange-600 text-white p-4 shadow-lg">
-        <h1 className="text-xl font-bold">&#x1F527; Voltride Maintenance</h1>
+        <h1 className="text-xl font-bold">🔧 Voltride Maintenance</h1>
         <div className="flex gap-4 mt-2">
-          <button onClick={() => setPage('vehicles')} className={'text-sm font-medium pb-1 border-b-2 ' + (page === 'vehicles' ? 'border-white' : 'border-transparent opacity-70')}>Veh&#237;culos</button>
+          <button onClick={() => setPage('vehicles')} className={'text-sm font-medium pb-1 border-b-2 ' + (page === 'vehicles' ? 'border-white' : 'border-transparent opacity-70')}>Vehículos</button>
           <button onClick={() => { setPage('stock'); loadInventory() }} className={'text-sm font-medium pb-1 border-b-2 ' + (page === 'stock' ? 'border-white' : 'border-transparent opacity-70')}>
             Stock {lowStock.length > 0 && <span className="ml-1 bg-red-500 text-white text-xs px-1.5 py-0.5 rounded-full">{lowStock.length}</span>}
           </button>
@@ -324,19 +324,19 @@ export default function App() {
         <>
           <div className="p-4 flex gap-2">
             <button onClick={() => setFilter('MAINTENANCE')} className={'px-4 py-2 rounded-lg font-medium text-sm ' + (filter === 'MAINTENANCE' ? 'bg-orange-500 text-white' : 'bg-white text-gray-700 border')}>
-              &#x1F527; Mant. ({vehicles.filter((v: any) => v.status === 'MAINTENANCE').length})
+              🔧 Mant. ({vehicles.filter((v: any) => v.status === 'MAINTENANCE').length})
             </button>
             <button onClick={() => setFilter('ALL')} className={'px-4 py-2 rounded-lg font-medium text-sm ' + (filter === 'ALL' ? 'bg-orange-500 text-white' : 'bg-white text-gray-700 border')}>Todos ({vehicles.length})</button>
-            <button onClick={loadVehicles} className="ml-auto px-3 py-2 bg-white border rounded-lg text-sm">&#x1F504;</button>
+            <button onClick={loadVehicles} className="ml-auto px-3 py-2 bg-white border rounded-lg text-sm">🔄</button>
           </div>
           <div className="px-4 space-y-3 pb-20">
             {loading ? <div className="text-center py-10 text-gray-500">Cargando...</div>
-            : filtered.length === 0 ? <div className="text-center py-10 text-gray-500">{filter === 'MAINTENANCE' ? 'Ning&#250;n veh&#237;culo en mantenimiento' : 'No hay veh&#237;culos'}</div>
+            : filtered.length === 0 ? <div className="text-center py-10 text-gray-500">{filter === 'MAINTENANCE' ? 'Ningún vehículo en mantenimiento' : 'No hay vehículos'}</div>
             : filtered.map((v: any) => (
               <div key={v.id} onClick={() => openVehicle(v)} className={'bg-white rounded-xl shadow p-4 cursor-pointer hover:shadow-md transition ' + (v.status === 'MAINTENANCE' ? 'border-l-4 border-orange-500' : '')}>
                 <div className="flex items-center gap-3">
                   <div className="w-14 h-14 bg-gray-100 rounded-lg overflow-hidden flex items-center justify-center">
-                    {v.vehicle?.imageUrl ? <img src={v.vehicle.imageUrl} className="w-full h-full object-cover" /> : <span className="text-2xl">&#x1F6B2;</span>}
+                    {v.vehicle?.imageUrl ? <img src={v.vehicle.imageUrl} className="w-full h-full object-cover" /> : <span className="text-2xl">🚲</span>}
                   </div>
                   <div className="flex-1">
                     <div className="font-bold">{v.vehicleNumber}</div>
@@ -356,7 +356,7 @@ export default function App() {
       {page === 'stock' && (
         <div className="p-4">
           <div className="flex gap-2 mb-4">
-            <input value={stockSearch} onChange={e => setStockSearch(e.target.value)} onKeyDown={e => e.key === 'Enter' && loadInventory()} placeholder="Buscar pieza, ref, c&#243;digo..." className="flex-1 border rounded-lg p-2 text-sm" />
+            <input value={stockSearch} onChange={e => setStockSearch(e.target.value)} onKeyDown={e => e.key === 'Enter' && loadInventory()} placeholder="Buscar pieza, ref, código..." className="flex-1 border rounded-lg p-2 text-sm" />
             <button onClick={loadInventory} className="px-3 py-2 bg-orange-500 text-white rounded-lg text-sm">Buscar</button>
             <button onClick={() => { resetNewPart(); setShowAddPart(true) }} className="px-3 py-2 bg-green-500 text-white rounded-lg text-sm font-bold">+</button>
           </div>
@@ -371,7 +371,7 @@ export default function App() {
               <div key={p.id} onClick={() => openPartDetail(p)} className={'bg-white rounded-xl shadow p-4 cursor-pointer hover:shadow-md ' + (p.quantityInStock <= p.minimumStock ? 'border-l-4 border-red-400' : '')}>
                 <div className="flex items-center gap-3">
                   <div className="w-12 h-12 bg-gray-100 rounded-lg overflow-hidden flex items-center justify-center">
-                    {p.imageUrl ? <img src={p.imageUrl} className="w-full h-full object-cover" /> : <span className="text-lg">&#x1F529;</span>}
+                    {p.imageUrl ? <img src={p.imageUrl} className="w-full h-full object-cover" /> : <span className="text-lg">🔩</span>}
                   </div>
                   <div className="flex-1">
                     <div className="font-bold text-sm">{p.name}</div>
@@ -380,7 +380,7 @@ export default function App() {
                   </div>
                   <div className="text-right">
                     <div className={'font-bold text-lg ' + (p.quantityInStock <= p.minimumStock ? 'text-red-600' : 'text-green-600')}>{p.quantityInStock}</div>
-                    <div className="text-xs text-gray-500">{Number(p.price).toFixed(2)}&#8364;</div>
+                    <div className="text-xs text-gray-500">{Number(p.price).toFixed(2)}€</div>
                   </div>
                 </div>
               </div>
@@ -404,16 +404,16 @@ export default function App() {
           </div>
           <div className="space-y-3 pb-20">
             {techDocs.filter(d => d.vehicleCategory === docCategory).length === 0 ? (
-              <div className="text-center py-10 text-gray-400">Sin documentos para esta categor&#237;a</div>
+              <div className="text-center py-10 text-gray-400">Sin documentos para esta categoría</div>
             ) : techDocs.filter(d => d.vehicleCategory === docCategory).map((doc: any) => (
               <div key={doc.id} className="bg-white rounded-xl shadow p-4">
                 <div className="flex items-center gap-3">
                   <div className="w-12 h-12 bg-gray-100 rounded-lg flex items-center justify-center text-lg">
-                    {doc.fileType === 'pdf' ? '&#x1F4C4;' : doc.fileType === 'image' ? '&#x1F5BC;' : '&#x1F4CE;'}
+                    {doc.fileType === 'pdf' ? '📄' : doc.fileType === 'image' ? '🖼' : '📎'}
                   </div>
                   <div className="flex-1">
                     <div className="font-bold text-sm">{doc.title}</div>
-                    <div className="text-xs text-gray-500">{doc.docType === 'MANUAL' ? 'Manual' : doc.docType === 'EXPLODED_VIEW' ? 'Vista eclatada' : doc.docType === 'WIRING' ? 'Esquema el&#233;ctrico' : doc.docType === 'SPECS' ? 'Especificaciones' : 'Otro'}</div>
+                    <div className="text-xs text-gray-500">{doc.docType === 'MANUAL' ? 'Manual' : doc.docType === 'EXPLODED_VIEW' ? 'Vista eclatada' : doc.docType === 'WIRING' ? 'Esquema eléctrico' : doc.docType === 'SPECS' ? 'Especificaciones' : 'Otro'}</div>
                     {doc.description && <div className="text-xs text-gray-400 mt-1">{doc.description}</div>}
                   </div>
                   <div className="flex gap-1">
@@ -433,19 +433,19 @@ export default function App() {
           <div className="bg-white rounded-2xl w-full max-w-md mx-4 p-5" onClick={e => e.stopPropagation()}>
             <h2 className="text-lg font-bold mb-4">Nuevo documento</h2>
             <div className="space-y-3">
-              <input value={newDoc.title} onChange={e => setNewDoc({...newDoc, title: e.target.value})} placeholder="T&#237;tulo *" className="w-full border rounded-lg p-2 text-sm" />
+              <input value={newDoc.title} onChange={e => setNewDoc({...newDoc, title: e.target.value})} placeholder="Título *" className="w-full border rounded-lg p-2 text-sm" />
               <div className="grid grid-cols-2 gap-2">
                 <select value={newDoc.vehicleCategory} onChange={e => setNewDoc({...newDoc, vehicleCategory: e.target.value})} className="border rounded-lg p-2 text-sm">
                   <option value="CITY_BIKE">City Bike</option><option value="E_BIKE">E-Bike</option><option value="E_MOTOCROSS">E-Motocross</option>
                 </select>
                 <select value={newDoc.docType} onChange={e => setNewDoc({...newDoc, docType: e.target.value})} className="border rounded-lg p-2 text-sm">
-                  <option value="MANUAL">Manual</option><option value="EXPLODED_VIEW">Vista eclatada</option><option value="WIRING">Esquema el&#233;ctrico</option><option value="SPECS">Especificaciones</option><option value="OTHER">Otro</option>
+                  <option value="MANUAL">Manual</option><option value="EXPLODED_VIEW">Vista eclatada</option><option value="WIRING">Esquema eléctrico</option><option value="SPECS">Especificaciones</option><option value="OTHER">Otro</option>
                 </select>
               </div>
-              <textarea value={newDoc.description} onChange={e => setNewDoc({...newDoc, description: e.target.value})} placeholder="Descripci&#243;n..." rows={2} className="w-full border rounded-lg p-2 text-sm" />
+              <textarea value={newDoc.description} onChange={e => setNewDoc({...newDoc, description: e.target.value})} placeholder="Descripción..." rows={2} className="w-full border rounded-lg p-2 text-sm" />
               <div className="border-2 border-dashed border-gray-300 rounded-lg p-4 text-center cursor-pointer" onClick={() => docFileRef.current?.click()}>
                 {newDoc.fileUrl ? (
-                  <div className="text-green-600 text-sm font-medium">Archivo subido &#10003;</div>
+                  <div className="text-green-600 text-sm font-medium">Archivo subido ✓</div>
                 ) : uploading ? (
                   <div className="text-orange-500 text-sm">Subiendo...</div>
                 ) : (
@@ -502,7 +502,7 @@ export default function App() {
                   : spareParts.map((p: any) => (
                     <div key={p.id} className="bg-gray-50 rounded-lg p-3 mb-2 flex justify-between">
                       <div><div className="font-medium text-sm">{p.name}</div><div className="text-xs text-gray-500">{p.partNumber || ''}</div></div>
-                      <div className="text-right"><div className="font-bold text-sm">{Number(p.totalCost || 0).toFixed(2)}&#8364;</div><div className="text-xs text-gray-500">Stock: {p.quantityInStock}</div></div>
+                      <div className="text-right"><div className="font-bold text-sm">{Number(p.totalCost || 0).toFixed(2)}€</div><div className="text-xs text-gray-500">Stock: {p.quantityInStock}</div></div>
                     </div>
                   ))}
                 </div>
@@ -520,7 +520,7 @@ export default function App() {
                   : maintenance.map((m: any) => (
                     <div key={m.id} className="bg-gray-50 rounded-lg p-3 mb-2">
                       <div className="flex justify-between"><div className="font-medium text-sm">{m.description}</div><div className="text-xs text-gray-500">{formatDate(m.completedDate || m.scheduledDate)}</div></div>
-                      {m.cost > 0 && <div className="text-xs text-orange-600 mt-1">Coste: {Number(m.cost).toFixed(2)}&#8364;</div>}
+                      {m.cost > 0 && <div className="text-xs text-orange-600 mt-1">Coste: {Number(m.cost).toFixed(2)}€</div>}
                     </div>
                   ))}
                 </div>
@@ -562,7 +562,7 @@ export default function App() {
               </div>
               <div className="grid grid-cols-2 gap-2">
                 <input value={newPart.sku} onChange={e => setNewPart({...newPart, sku: e.target.value})} placeholder="SKU / Ref" className="border rounded-lg p-2 text-sm" />
-                <input value={newPart.barcode} onChange={e => setNewPart({...newPart, barcode: e.target.value})} placeholder="C&#243;digo barras" className="border rounded-lg p-2 text-sm" />
+                <input value={newPart.barcode} onChange={e => setNewPart({...newPart, barcode: e.target.value})} placeholder="Código barras" className="border rounded-lg p-2 text-sm" />
               </div>
               <div className="grid grid-cols-2 gap-2">
                 <input value={newPart.price} onChange={e => setNewPart({...newPart, price: e.target.value})} placeholder="Precio *" type="number" className="border rounded-lg p-2 text-sm" />
@@ -573,13 +573,13 @@ export default function App() {
                   <option value="ALL">Todos</option><option value="CB">CB</option><option value="EB">EB</option><option value="EM">EM</option>
                 </select>
                 <select value={newPart.category} onChange={e => setNewPart({...newPart, category: e.target.value})} className="border rounded-lg p-2 text-sm">
-                  <option value="GENERAL">General</option><option value="WHEEL">Rueda</option><option value="BRAKE">Freno</option><option value="CHAIN">Cadena</option><option value="LIGHT">Luz</option><option value="BATTERY">Bater&#237;a</option><option value="SEAT">Asiento</option><option value="HANDLEBAR">Manillar</option><option value="ACCESSORY">Accesorio</option><option value="CONSUMABLE">Consumible</option>
+                  <option value="GENERAL">General</option><option value="WHEEL">Rueda</option><option value="BRAKE">Freno</option><option value="CHAIN">Cadena</option><option value="LIGHT">Luz</option><option value="BATTERY">Batería</option><option value="SEAT">Asiento</option><option value="HANDLEBAR">Manillar</option><option value="ACCESSORY">Accesorio</option><option value="CONSUMABLE">Consumible</option>
                 </select>
               </div>
               <input value={newPart.supplierName} onChange={e => setNewPart({...newPart, supplierName: e.target.value})} placeholder="Proveedor" className="w-full border rounded-lg p-2 text-sm" />
               <div className="grid grid-cols-2 gap-2">
                 <input value={newPart.quantityInStock} onChange={e => setNewPart({...newPart, quantityInStock: e.target.value})} placeholder="Cantidad" type="number" className="border rounded-lg p-2 text-sm" />
-                <input value={newPart.minimumStock} onChange={e => setNewPart({...newPart, minimumStock: e.target.value})} placeholder="Stock m&#237;nimo" type="number" className="border rounded-lg p-2 text-sm" />
+                <input value={newPart.minimumStock} onChange={e => setNewPart({...newPart, minimumStock: e.target.value})} placeholder="Stock mínimo" type="number" className="border rounded-lg p-2 text-sm" />
               </div>
             </div>
             <div className="flex gap-2 mt-4">
@@ -598,7 +598,7 @@ export default function App() {
               <div className="flex justify-between mb-2">
                 <div className="flex items-center gap-3">
                   <div className="w-14 h-14 bg-gray-100 rounded-lg overflow-hidden flex items-center justify-center">
-                    {selectedPart.imageUrl ? <img src={selectedPart.imageUrl} className="w-full h-full object-cover" /> : <span className="text-lg">&#x1F529;</span>}
+                    {selectedPart.imageUrl ? <img src={selectedPart.imageUrl} className="w-full h-full object-cover" /> : <span className="text-lg">🔩</span>}
                   </div>
                   <div><h2 className="text-lg font-bold">{selectedPart.name}</h2><p className="text-gray-500 text-xs">{selectedPart.sku || ''} {selectedPart.barcode ? '| ' + selectedPart.barcode : ''}</p></div>
                 </div>
@@ -610,7 +610,7 @@ export default function App() {
               </div>
               {selectedPart.compatibleFleetIds && selectedPart.compatibleFleetIds.length > 0 && (
                 <div className="mb-3 p-2 bg-blue-50 rounded-lg">
-                  <div className="text-xs font-medium text-blue-700 mb-1">Veh&#237;culos compatibles:</div>
+                  <div className="text-xs font-medium text-blue-700 mb-1">Vehículos compatibles:</div>
                   <div className="flex flex-wrap gap-1">
                     {selectedPart.compatibleFleetIds.map((fid: string) => {
                       const v = vehicles.find(x => x.id === fid)
@@ -621,14 +621,14 @@ export default function App() {
               )}
               <div className="grid grid-cols-3 gap-2 mb-4 text-center">
                 <div className="bg-gray-50 rounded-lg p-3"><div className="text-xs text-gray-500">Stock</div><div className={'text-xl font-bold ' + (selectedPart.quantityInStock <= selectedPart.minimumStock ? 'text-red-600' : 'text-green-600')}>{selectedPart.quantityInStock}</div></div>
-                <div className="bg-gray-50 rounded-lg p-3"><div className="text-xs text-gray-500">Precio</div><div className="text-xl font-bold">{Number(selectedPart.price).toFixed(2)}&#8364;</div></div>
+                <div className="bg-gray-50 rounded-lg p-3"><div className="text-xs text-gray-500">Precio</div><div className="text-xl font-bold">{Number(selectedPart.price).toFixed(2)}€</div></div>
                 <div className="bg-gray-50 rounded-lg p-3"><div className="text-xs text-gray-500">Min.</div><div className="text-xl font-bold">{selectedPart.minimumStock}</div></div>
               </div>
               <div className="bg-blue-50 rounded-lg p-3 mb-4">
                 <div className="text-sm font-medium mb-2">Movimiento de stock</div>
                 <input value={movementQty} onChange={e => setMovementQty(e.target.value)} placeholder="Cantidad" type="number" className="w-full border rounded-lg p-2 text-sm mb-2" />
                 <select value={movementVehicle} onChange={e => setMovementVehicle(e.target.value)} className="w-full border rounded-lg p-2 text-sm mb-2">
-                  <option value="">Sin veh&#237;culo</option>
+                  <option value="">Sin vehículo</option>
                   {vehicles.map((v: any) => <option key={v.id} value={v.id}>{v.vehicleNumber} - {getName(v.vehicle?.name)}</option>)}
                 </select>
                 <input value={movementNote} onChange={e => setMovementNote(e.target.value)} placeholder="Nota..." className="w-full border rounded-lg p-2 text-sm mb-2" />
@@ -669,7 +669,7 @@ export default function App() {
               </div>
               <div className="grid grid-cols-2 gap-2">
                 <input value={editPart.sku || ''} onChange={e => setEditPart({...editPart, sku: e.target.value})} placeholder="SKU" className="border rounded-lg p-2 text-sm" />
-                <input value={editPart.barcode || ''} onChange={e => setEditPart({...editPart, barcode: e.target.value})} placeholder="C&#243;digo barras" className="border rounded-lg p-2 text-sm" />
+                <input value={editPart.barcode || ''} onChange={e => setEditPart({...editPart, barcode: e.target.value})} placeholder="Código barras" className="border rounded-lg p-2 text-sm" />
               </div>
               <div className="grid grid-cols-2 gap-2">
                 <input value={editPart.price} onChange={e => setEditPart({...editPart, price: e.target.value})} placeholder="Precio" type="number" className="border rounded-lg p-2 text-sm" />
@@ -680,14 +680,14 @@ export default function App() {
                   <option value="ALL">Todos</option><option value="CB">CB</option><option value="EB">EB</option><option value="EM">EM</option>
                 </select>
                 <select value={editPart.category || 'GENERAL'} onChange={e => setEditPart({...editPart, category: e.target.value})} className="border rounded-lg p-2 text-sm">
-                  <option value="GENERAL">General</option><option value="WHEEL">Rueda</option><option value="BRAKE">Freno</option><option value="CHAIN">Cadena</option><option value="LIGHT">Luz</option><option value="BATTERY">Bater&#237;a</option><option value="SEAT">Asiento</option><option value="HANDLEBAR">Manillar</option><option value="ACCESSORY">Accesorio</option><option value="CONSUMABLE">Consumible</option>
+                  <option value="GENERAL">General</option><option value="WHEEL">Rueda</option><option value="BRAKE">Freno</option><option value="CHAIN">Cadena</option><option value="LIGHT">Luz</option><option value="BATTERY">Batería</option><option value="SEAT">Asiento</option><option value="HANDLEBAR">Manillar</option><option value="ACCESSORY">Accesorio</option><option value="CONSUMABLE">Consumible</option>
                 </select>
               </div>
               <input value={editPart.supplierName || ''} onChange={e => setEditPart({...editPart, supplierName: e.target.value})} placeholder="Proveedor" className="w-full border rounded-lg p-2 text-sm" />
-              <input value={editPart.minimumStock} onChange={e => setEditPart({...editPart, minimumStock: e.target.value})} placeholder="Stock m&#237;nimo" type="number" className="w-full border rounded-lg p-2 text-sm" />
+              <input value={editPart.minimumStock} onChange={e => setEditPart({...editPart, minimumStock: e.target.value})} placeholder="Stock mínimo" type="number" className="w-full border rounded-lg p-2 text-sm" />
 
               <div>
-                <div className="text-sm font-medium mb-2">Veh&#237;culos compatibles</div>
+                <div className="text-sm font-medium mb-2">Vehículos compatibles</div>
                 <div className="max-h-40 overflow-y-auto border rounded-lg p-2 space-y-1">
                   {vehicles.map((v: any) => (
                     <label key={v.id} className="flex items-center gap-2 cursor-pointer p-1 hover:bg-gray-50 rounded" onClick={() => toggleCompatible(v.id)}>
