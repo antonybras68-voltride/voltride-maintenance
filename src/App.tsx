@@ -116,7 +116,7 @@ export default function App() {
   const [selectedVehicle, setSelectedVehicle] = useState<any>(null)
   const [note, setNote] = useState('')
   const [saving, setSaving] = useState(false)
-  const [tab, setTab] = useState<'info' | 'parts' | 'history' | 'checklist'>('info')
+  const [tab, setTab] = useState<'info' | 'tasks' | 'history' | 'parts' | 'checklist'>('info')
   const [spareParts, setSpareParts] = useState<any[]>([])
   const [maintenance, setMaintenance] = useState<any[]>([])
   const [checklist, setChecklist] = useState<any[]>([])
@@ -252,7 +252,7 @@ export default function App() {
     setSelectedVehicle(v); setNote(v.maintenanceNotes || ''); setTab('info'); loadVehicleDetails(v)
   }
 
-  const filtered = filter === 'ALL' ? vehicles : vehicles.filter((v: any) => v.status === 'MAINTENANCE')
+  const filtered = filter === 'ALL' ? vehicles : filter === ('TODO' as any) ? vehicles.filter((v: any) => v.maintenanceRecords?.some((m: any) => m.status === 'SCHEDULED')) : vehicles.filter((v: any) => v.status === filter)
 
   const updateStatus = async (id: string, status: string) => {
     setSaving(true)
@@ -271,10 +271,15 @@ export default function App() {
     try {
       await fetch(API_URL + '/api/fleet/' + id, {
         method: 'PUT', headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ maintenanceNotes: note })
+        body: JSON.stringify({ maintenanceNotes: note || '' })
       })
+      const res = await fetch(API_URL + '/api/fleet/' + id)
+      if (res.ok) {
+        const updated = await res.json()
+        setSelectedVehicle(updated)
+        setNote(updated.maintenanceNotes || '')
+      }
       await loadVehicles()
-      if (selectedVehicle) setSelectedVehicle({ ...selectedVehicle, maintenanceNotes: note })
     } catch (e) { console.error(e) }
     setSaving(false)
   }
@@ -617,16 +622,16 @@ export default function App() {
                 <button onClick={() => setSelectedVehicle(null)} className="text-2xl text-gray-400">&times;</button>
               </div>
               <div className="flex gap-1 mb-4 border-b overflow-x-auto">
-                {(['info','parts','history','checklist'] as const).map(t => (
+                {(['info','tasks','history','parts','checklist'] as const).map(t => (
                   <button key={t} onClick={() => setTab(t)} className={'px-3 py-2 text-sm font-medium border-b-2 whitespace-nowrap ' + (tab === t ? 'border-[#ffaf10] text-[#ffaf10]' : 'border-transparent text-gray-500')}>
-                    {t === 'info' ? 'Info' : t === 'parts' ? 'Piezas' : t === 'history' ? 'Historial' : 'Check-list'}
+                    {t === 'info' ? 'Info' : t === 'tasks' ? '⚠️ Tareas' : t === 'history' ? 'Historial' : t === 'parts' ? 'Piezas' : 'Check-list'}
                   </button>
                 ))}
               </div>
               {tab === 'info' && (
                 <div>
-                  <div className={'text-center py-2 rounded-lg mb-4 font-medium ' + (selectedVehicle.status === 'MAINTENANCE' ? 'bg-[#ffaf10]/20 text-[#ffaf10]' : 'bg-green-100 text-green-700')}>
-                    {selectedVehicle.status === 'MAINTENANCE' ? 'En mantenimiento' : 'Disponible'}
+                  <div className={'text-center py-2 rounded-lg mb-4 font-medium ' + (selectedVehicle.status === 'MAINTENANCE' ? 'bg-[#ffaf10]/20 text-[#ffaf10]' : selectedVehicle.status === 'RENTED' ? 'bg-blue-100 text-blue-700' : 'bg-green-100 text-green-700')}>
+                    {selectedVehicle.status === 'MAINTENANCE' ? 'En mantenimiento' : selectedVehicle.status === 'RENTED' ? 'Alquilado' : selectedVehicle.status === 'RESERVED' ? 'Reservado' : 'Disponible'}
                   </div>
                   <div className="mb-4">
                     <label className="block text-sm font-medium mb-1">Notas</label>
@@ -652,7 +657,7 @@ export default function App() {
                   ))}
                 </div>
               )}
-              {tab === 'history' && (
+              {tab === 'tasks' && (
                 <div>
                   {/* Ajouter tâche manuelle */}
                   <div className="bg-[#abdee6]/20 rounded-lg p-3 mb-4">
@@ -663,32 +668,40 @@ export default function App() {
                       <button onClick={addMaintenance} disabled={saving || !newMaintDesc} className="px-4 py-2 bg-[#ffaf10] text-white rounded-lg text-sm font-medium disabled:opacity-50">Agregar</button>
                     </div>
                   </div>
-
                   {/* Tâches en attente */}
-                  {maintenance.filter((m: any) => m.status === 'SCHEDULED' || m.status === 'IN_PROGRESS').length > 0 && (
-                    <div className="mb-4">
-                      <p className="text-xs font-bold text-red-600 mb-2 uppercase">⚠️ Tareas pendientes</p>
-                      {maintenance.filter((m: any) => m.status === 'SCHEDULED' || m.status === 'IN_PROGRESS').map((m: any) => (
-                        <div key={m.id} className="bg-red-50 border border-red-200 rounded-lg p-3 mb-2">
-                          <div className="flex justify-between items-start">
-                            <div className="flex-1">
-                              <div className="font-medium text-sm">{m.description}</div>
-                              <div className="text-xs text-gray-500 mt-1">
-                                {m.priority === 'HIGH' || m.priority === 'URGENT' ? '🔴' : '🟡'} {m.priority || 'NORMAL'} · {formatDate(m.scheduledDate)}
-                                {m.description?.includes('auto') ? ' · 🤖 Auto' : ' · ✍️ Manual'}
-                              </div>
+                  {maintenance.filter((m: any) => m.status === 'SCHEDULED' || m.status === 'IN_PROGRESS').length === 0
+                    ? <div className="text-center py-6 text-gray-400 text-sm">✅ Ninguna tarea pendiente</div>
+                    : maintenance.filter((m: any) => m.status === 'SCHEDULED' || m.status === 'IN_PROGRESS').map((m: any) => (
+                      <div key={m.id} className="bg-red-50 border border-red-200 rounded-lg p-3 mb-2">
+                        <div className="flex justify-between items-start">
+                          <div className="flex-1">
+                            <div className="font-medium text-sm">{m.description}</div>
+                            <div className="text-xs text-gray-500 mt-1">
+                              {m.priority === 'HIGH' || m.priority === 'URGENT' ? '🔴' : '🟡'} {m.priority || 'NORMAL'} · {formatDate(m.scheduledDate)}
+                              {m.description?.includes('auto') ? ' · 🤖 Auto' : ' · ✍️ Manual'}
                             </div>
-                            <button onClick={() => completeMaintenance(m.id)} disabled={saving} className="ml-2 px-3 py-1.5 bg-green-500 text-white rounded-lg text-xs font-bold disabled:opacity-50">✅ Validar</button>
                           </div>
+                          <button onClick={() => completeMaintenance(m.id)} disabled={saving} className="ml-2 px-3 py-1.5 bg-green-500 text-white rounded-lg text-xs font-bold disabled:opacity-50">✅ Validar</button>
                         </div>
-                      ))}
-                    </div>
-                  )}
-
-                  {/* Historique complété */}
-                  <p className="text-xs font-bold text-gray-500 mb-2 uppercase">📋 Historial completado</p>
+                      </div>
+                    ))
+                  }
+                </div>
+              )}
+              {tab === 'history' && (
+                <div>
+                  <div className="flex justify-between items-center mb-3">
+                    <p className="text-xs font-bold text-gray-500 uppercase">📋 Historial completo</p>
+                    <button onClick={() => {
+                      const rows = maintenance.filter((m: any) => m.status === 'COMPLETED').map((m: any) =>
+                        (m.completedAt || m.scheduledDate || '').substring(0,10) + ' | ' + m.description + ' | ' + (m.description?.includes('auto') ? 'Auto' : 'Manual') + ' | ' + Number(m.totalCost || 0).toFixed(2) + '€'
+                      )
+                      const text = 'HISTORIAL MANTENIMIENTO - ' + selectedVehicle.vehicleNumber + '\n' + getName(selectedVehicle.vehicle?.name) + '\n\nFecha | Descripción | Tipo | Coste\n' + rows.join('\n')
+                      navigator.clipboard.writeText(text).then(() => alert('Historial copiado al portapapeles'))
+                    }} className="px-3 py-1 bg-gray-200 text-gray-700 rounded text-xs font-medium hover:bg-gray-300">📋 Copiar</button>
+                  </div>
                   {maintenance.filter((m: any) => m.status === 'COMPLETED').length === 0
-                    ? <div className="text-center py-4 text-gray-400 text-sm">Sin historial</div>
+                    ? <div className="text-center py-6 text-gray-400 text-sm">Sin historial</div>
                     : maintenance.filter((m: any) => m.status === 'COMPLETED').map((m: any) => (
                       <div key={m.id} className="bg-gray-50 rounded-lg p-3 mb-2">
                         <div className="flex justify-between">
