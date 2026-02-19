@@ -66,7 +66,7 @@ function Login({ onLogin }: { onLogin: (user: any, token: string) => void }) {
 export default function App() {
   // ===== AUTH STATE =====
   const [user, setUser] = useState<any>(null)
-  const [authToken, setAuthToken] = useState<string | null>(null)
+  const [_authToken, setAuthToken] = useState<string | null>(null)
   const [authLoading, setAuthLoading] = useState(true)
 
   useEffect(() => {
