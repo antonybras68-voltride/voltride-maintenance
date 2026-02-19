@@ -290,7 +290,7 @@ export default function App() {
     try {
       await fetch(API_URL + '/api/fleet/' + selectedVehicle.id + '/maintenance', {
         method: 'POST', headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ type: 'CORRECTIVE', description: newMaintDesc, cost: parseFloat(newMaintCost) || 0, status: 'SCHEDULED', priority: 'NORMAL', scheduledDate: new Date().toISOString() })
+        body: JSON.stringify({ type: 'REPAIR', description: newMaintDesc, cost: parseFloat(newMaintCost) || 0, status: 'SCHEDULED', priority: 'NORMAL', scheduledDate: new Date().toISOString() })
       })
       setNewMaintDesc(''); setNewMaintCost('')
       const res = await fetch(API_URL + '/api/fleet/' + selectedVehicle.id + '/maintenance')
