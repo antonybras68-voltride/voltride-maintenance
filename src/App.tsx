@@ -309,9 +309,12 @@ export default function App() {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <div className="bg-gradient-to-r from-orange-500 to-orange-600 text-white p-4 shadow-lg">
-        <h1 className="text-xl font-bold">🔧 Voltride Maintenance</h1>
-        <div className="flex gap-4 mt-2">
+      <div className="text-white p-4 shadow-lg" style={{background: 'linear-gradient(135deg, #abdee6, #ffaf10)'}}>
+        <div className="flex items-center gap-3 mb-2">
+          <img src="https://res.cloudinary.com/dis5pcnfr/image/upload/v1769278425/IMG-20260111-WA0001_1_-removebg-preview_zzajxa.png" alt="Voltride" className="h-8" />
+          <h1 className="text-xl font-bold">Maintenance</h1>
+        </div>
+        <div className="flex gap-4">
           <button onClick={() => setPage('vehicles')} className={'text-sm font-medium pb-1 border-b-2 ' + (page === 'vehicles' ? 'border-white' : 'border-transparent opacity-70')}>Vehículos</button>
           <button onClick={() => { setPage('stock'); loadInventory() }} className={'text-sm font-medium pb-1 border-b-2 ' + (page === 'stock' ? 'border-white' : 'border-transparent opacity-70')}>
             Stock {lowStock.length > 0 && <span className="ml-1 bg-red-500 text-white text-xs px-1.5 py-0.5 rounded-full">{lowStock.length}</span>}
@@ -323,17 +326,17 @@ export default function App() {
       {page === 'vehicles' && (
         <>
           <div className="p-4 flex gap-2">
-            <button onClick={() => setFilter('MAINTENANCE')} className={'px-4 py-2 rounded-lg font-medium text-sm ' + (filter === 'MAINTENANCE' ? 'bg-orange-500 text-white' : 'bg-white text-gray-700 border')}>
+            <button onClick={() => setFilter('MAINTENANCE')} className={'px-4 py-2 rounded-lg font-medium text-sm ' + (filter === 'MAINTENANCE' ? 'bg-[#ffaf10] text-white' : 'bg-white text-gray-700 border')}>
               🔧 Mant. ({vehicles.filter((v: any) => v.status === 'MAINTENANCE').length})
             </button>
-            <button onClick={() => setFilter('ALL')} className={'px-4 py-2 rounded-lg font-medium text-sm ' + (filter === 'ALL' ? 'bg-orange-500 text-white' : 'bg-white text-gray-700 border')}>Todos ({vehicles.length})</button>
+            <button onClick={() => setFilter('ALL')} className={'px-4 py-2 rounded-lg font-medium text-sm ' + (filter === 'ALL' ? 'bg-[#ffaf10] text-white' : 'bg-white text-gray-700 border')}>Todos ({vehicles.length})</button>
             <button onClick={loadVehicles} className="ml-auto px-3 py-2 bg-white border rounded-lg text-sm">🔄</button>
           </div>
           <div className="px-4 space-y-3 pb-20">
             {loading ? <div className="text-center py-10 text-gray-500">Cargando...</div>
             : filtered.length === 0 ? <div className="text-center py-10 text-gray-500">{filter === 'MAINTENANCE' ? 'Ningún vehículo en mantenimiento' : 'No hay vehículos'}</div>
             : filtered.map((v: any) => (
-              <div key={v.id} onClick={() => openVehicle(v)} className={'bg-white rounded-xl shadow p-4 cursor-pointer hover:shadow-md transition ' + (v.status === 'MAINTENANCE' ? 'border-l-4 border-orange-500' : '')}>
+              <div key={v.id} onClick={() => openVehicle(v)} className={'bg-white rounded-xl shadow p-4 cursor-pointer hover:shadow-md transition ' + (v.status === 'MAINTENANCE' ? 'border-l-4 border-[#ffaf10]' : '')}>
                 <div className="flex items-center gap-3">
                   <div className="w-14 h-14 bg-gray-100 rounded-lg overflow-hidden flex items-center justify-center">
                     {v.vehicle?.imageUrl ? <img src={v.vehicle.imageUrl} className="w-full h-full object-cover" /> : <span className="text-2xl">🚲</span>}
@@ -342,11 +345,11 @@ export default function App() {
                     <div className="font-bold">{v.vehicleNumber}</div>
                     <div className="text-sm text-gray-600">{getName(v.vehicle?.name)}</div>
                   </div>
-                  <div className={'text-xs px-2 py-1 rounded-full font-medium ' + (v.status === 'MAINTENANCE' ? 'bg-orange-100 text-orange-700' : v.status === 'AVAILABLE' ? 'bg-green-100 text-green-700' : 'bg-blue-100 text-blue-700')}>
+                  <div className={'text-xs px-2 py-1 rounded-full font-medium ' + (v.status === 'MAINTENANCE' ? 'bg-[#ffaf10]/20 text-[#ffaf10]' : v.status === 'AVAILABLE' ? 'bg-green-100 text-green-700' : 'bg-blue-100 text-blue-700')}>
                     {v.status === 'MAINTENANCE' ? 'Mant.' : v.status === 'AVAILABLE' ? 'Disp.' : 'Alquilado'}
                   </div>
                 </div>
-                {v.maintenanceNotes && <div className="mt-2 p-2 bg-orange-50 rounded text-sm text-orange-800">{v.maintenanceNotes}</div>}
+                {v.maintenanceNotes && <div className="mt-2 p-2 bg-[#ffaf10]/10 rounded text-sm text-[#ffaf10]">{v.maintenanceNotes}</div>}
               </div>
             ))}
           </div>
@@ -357,7 +360,7 @@ export default function App() {
         <div className="p-4">
           <div className="flex gap-2 mb-4">
             <input value={stockSearch} onChange={e => setStockSearch(e.target.value)} onKeyDown={e => e.key === 'Enter' && loadInventory()} placeholder="Buscar pieza, ref, código..." className="flex-1 border rounded-lg p-2 text-sm" />
-            <button onClick={loadInventory} className="px-3 py-2 bg-orange-500 text-white rounded-lg text-sm">Buscar</button>
+            <button onClick={loadInventory} className="px-3 py-2 bg-[#ffaf10] text-white rounded-lg text-sm">Buscar</button>
             <button onClick={() => { resetNewPart(); setShowAddPart(true) }} className="px-3 py-2 bg-green-500 text-white rounded-lg text-sm font-bold">+</button>
           </div>
           {lowStock.length > 0 && (
@@ -395,7 +398,7 @@ export default function App() {
           <div className="flex gap-2 mb-4">
             {['CITY_BIKE', 'E_BIKE', 'E_MOTOCROSS'].map(cat => (
               <button key={cat} onClick={() => { setDocCategory(cat); loadDocs(cat) }}
-                className={'px-3 py-2 rounded-lg text-sm font-medium ' + (docCategory === cat ? 'bg-orange-500 text-white' : 'bg-white text-gray-700 border')}>
+                className={'px-3 py-2 rounded-lg text-sm font-medium ' + (docCategory === cat ? 'bg-[#ffaf10] text-white' : 'bg-white text-gray-700 border')}>
                 {cat === 'CITY_BIKE' ? 'City Bike' : cat === 'E_BIKE' ? 'E-Bike' : 'E-Motocross'}
               </button>
             ))}
@@ -473,26 +476,26 @@ export default function App() {
               </div>
               <div className="flex gap-1 mb-4 border-b overflow-x-auto">
                 {(['info','parts','history','checklist'] as const).map(t => (
-                  <button key={t} onClick={() => setTab(t)} className={'px-3 py-2 text-sm font-medium border-b-2 whitespace-nowrap ' + (tab === t ? 'border-orange-500 text-orange-600' : 'border-transparent text-gray-500')}>
+                  <button key={t} onClick={() => setTab(t)} className={'px-3 py-2 text-sm font-medium border-b-2 whitespace-nowrap ' + (tab === t ? 'border-[#ffaf10] text-[#ffaf10]' : 'border-transparent text-gray-500')}>
                     {t === 'info' ? 'Info' : t === 'parts' ? 'Piezas' : t === 'history' ? 'Historial' : 'Check-list'}
                   </button>
                 ))}
               </div>
               {tab === 'info' && (
                 <div>
-                  <div className={'text-center py-2 rounded-lg mb-4 font-medium ' + (selectedVehicle.status === 'MAINTENANCE' ? 'bg-orange-100 text-orange-700' : 'bg-green-100 text-green-700')}>
+                  <div className={'text-center py-2 rounded-lg mb-4 font-medium ' + (selectedVehicle.status === 'MAINTENANCE' ? 'bg-[#ffaf10]/20 text-[#ffaf10]' : 'bg-green-100 text-green-700')}>
                     {selectedVehicle.status === 'MAINTENANCE' ? 'En mantenimiento' : 'Disponible'}
                   </div>
                   <div className="mb-4">
                     <label className="block text-sm font-medium mb-1">Notas</label>
                     <textarea value={note} onChange={e => setNote(e.target.value)} rows={3} className="w-full border rounded-lg p-2 text-sm" />
-                    <button onClick={() => saveNote(selectedVehicle.id)} disabled={saving} className="mt-2 w-full py-2 bg-orange-500 text-white rounded-lg text-sm font-medium disabled:opacity-50">
+                    <button onClick={() => saveNote(selectedVehicle.id)} disabled={saving} className="mt-2 w-full py-2 bg-[#ffaf10] text-white rounded-lg text-sm font-medium disabled:opacity-50">
                       {saving ? 'Guardando...' : 'Guardar'}
                     </button>
                   </div>
                   <div className="space-y-2">
                     {selectedVehicle.status === 'MAINTENANCE' && <button onClick={() => updateStatus(selectedVehicle.id, 'AVAILABLE')} disabled={saving} className="w-full py-3 bg-green-500 text-white rounded-lg font-bold disabled:opacity-50">Marcar disponible</button>}
-                    {selectedVehicle.status === 'AVAILABLE' && <button onClick={() => updateStatus(selectedVehicle.id, 'MAINTENANCE')} disabled={saving} className="w-full py-3 bg-orange-500 text-white rounded-lg font-bold disabled:opacity-50">Pasar a mantenimiento</button>}
+                    {selectedVehicle.status === 'AVAILABLE' && <button onClick={() => updateStatus(selectedVehicle.id, 'MAINTENANCE')} disabled={saving} className="w-full py-3 bg-[#ffaf10] text-white rounded-lg font-bold disabled:opacity-50">Pasar a mantenimiento</button>}
                   </div>
                 </div>
               )}
@@ -509,18 +512,18 @@ export default function App() {
               )}
               {tab === 'history' && (
                 <div>
-                  <div className="bg-orange-50 rounded-lg p-3 mb-4">
+                  <div className="bg-[#abdee6]/20 rounded-lg p-3 mb-4">
                     <input value={newMaintDesc} onChange={e => setNewMaintDesc(e.target.value)} placeholder="Trabajo realizado..." className="w-full border rounded-lg p-2 text-sm mb-2" />
                     <div className="flex gap-2">
                       <input value={newMaintCost} onChange={e => setNewMaintCost(e.target.value)} placeholder="Coste" type="number" className="flex-1 border rounded-lg p-2 text-sm" />
-                      <button onClick={addMaintenance} disabled={saving || !newMaintDesc} className="px-4 py-2 bg-orange-500 text-white rounded-lg text-sm disabled:opacity-50">Agregar</button>
+                      <button onClick={addMaintenance} disabled={saving || !newMaintDesc} className="px-4 py-2 bg-[#ffaf10] text-white rounded-lg text-sm disabled:opacity-50">Agregar</button>
                     </div>
                   </div>
                   {maintenance.length === 0 ? <div className="text-center py-6 text-gray-400 text-sm">Sin historial</div>
                   : maintenance.map((m: any) => (
                     <div key={m.id} className="bg-gray-50 rounded-lg p-3 mb-2">
                       <div className="flex justify-between"><div className="font-medium text-sm">{m.description}</div><div className="text-xs text-gray-500">{formatDate(m.completedDate || m.scheduledDate)}</div></div>
-                      {m.cost > 0 && <div className="text-xs text-orange-600 mt-1">Coste: {Number(m.cost).toFixed(2)}€</div>}
+                      {m.cost > 0 && <div className="text-xs text-[#ffaf10] mt-1">Coste: {Number(m.cost).toFixed(2)}€</div>}
                     </div>
                   ))}
                 </div>
@@ -703,7 +706,7 @@ export default function App() {
             </div>
             <div className="flex gap-2 mt-4">
               <button onClick={() => setEditPart(null)} className="flex-1 py-2 bg-gray-100 text-gray-700 rounded-lg">Cancelar</button>
-              <button onClick={saveEditPart} disabled={saving} className="flex-1 py-2 bg-orange-500 text-white rounded-lg font-medium disabled:opacity-50">Guardar</button>
+              <button onClick={saveEditPart} disabled={saving} className="flex-1 py-2 bg-[#ffaf10] text-white rounded-lg font-medium disabled:opacity-50">Guardar</button>
             </div>
           </div>
         </div>

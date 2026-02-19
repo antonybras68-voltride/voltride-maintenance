@@ -1,0 +1,15 @@
+{
+  "name": "Voltride Maintenance",
+  "short_name": "Maintenance",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#abdee6",
+  "theme_color": "#ffaf10",
+  "icons": [
+    {
+      "src": "https://res.cloudinary.com/dis5pcnfr/image/upload/v1769278425/IMG-20260111-WA0001_1_-removebg-preview_zzajxa.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    }
+  ]
+}
