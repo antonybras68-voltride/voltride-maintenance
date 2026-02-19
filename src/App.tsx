@@ -285,11 +285,26 @@ export default function App() {
     try {
       await fetch(API_URL + '/api/fleet/' + selectedVehicle.id + '/maintenance', {
         method: 'POST', headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ type: 'CORRECTIVE', description: newMaintDesc, cost: parseFloat(newMaintCost) || 0, status: 'COMPLETED', scheduledDate: new Date().toISOString(), completedDate: new Date().toISOString() })
+        body: JSON.stringify({ type: 'CORRECTIVE', description: newMaintDesc, cost: parseFloat(newMaintCost) || 0, status: 'SCHEDULED', priority: 'NORMAL', scheduledDate: new Date().toISOString() })
       })
       setNewMaintDesc(''); setNewMaintCost('')
       const res = await fetch(API_URL + '/api/fleet/' + selectedVehicle.id + '/maintenance')
       if (res.ok) setMaintenance(await res.json())
+    } catch (e) { console.error(e) }
+    setSaving(false)
+  }
+
+  const completeMaintenance = async (maintId: string) => {
+    if (!selectedVehicle) return
+    setSaving(true)
+    try {
+      await fetch(API_URL + '/api/maintenance/' + maintId, {
+        method: 'PUT', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ status: 'COMPLETED', completedAt: new Date().toISOString(), mileage: selectedVehicle.currentMileage || 0 })
+      })
+      const res = await fetch(API_URL + '/api/fleet/' + selectedVehicle.id + '/maintenance')
+      if (res.ok) setMaintenance(await res.json())
+      await loadVehicles()
     } catch (e) { console.error(e) }
     setSaving(false)
   }
@@ -451,6 +466,9 @@ export default function App() {
               🔧 Mant. ({vehicles.filter((v: any) => v.status === 'MAINTENANCE').length})
             </button>
             <button onClick={() => setFilter('ALL')} className={'px-4 py-2 rounded-lg font-medium text-sm ' + (filter === 'ALL' ? 'bg-[#ffaf10] text-white' : 'bg-white text-gray-700 border')}>Todos ({vehicles.length})</button>
+            <button onClick={() => setFilter('TODO' as any)} className={'px-4 py-2 rounded-lg font-medium text-sm ' + (filter === ('TODO' as any) ? 'bg-red-500 text-white' : 'bg-white text-gray-700 border')}>
+              📋 Tarea ({vehicles.filter((v: any) => v.maintenanceRecords?.some((m: any) => m.status === 'SCHEDULED')).length})
+            </button>
             <button onClick={loadVehicles} className="ml-auto px-3 py-2 bg-white border rounded-lg text-sm">🔄</button>
           </div>
           <div className="px-4 space-y-3 pb-20">
@@ -466,6 +484,9 @@ export default function App() {
                     <div className="font-bold">{v.vehicleNumber}</div>
                     <div className="text-sm text-gray-600">{getName(v.vehicle?.name)}</div>
                   </div>
+                  {v.maintenanceRecords?.some((m: any) => m.status === 'SCHEDULED') && (
+                    <span className="bg-red-500 text-white text-xs px-2 py-1 rounded-full font-bold">⚠️ {v.maintenanceRecords.filter((m: any) => m.status === 'SCHEDULED').length}</span>
+                  )}
                   <div className={'text-xs px-2 py-1 rounded-full font-medium ' + (v.status === 'MAINTENANCE' ? 'bg-[#ffaf10]/20 text-[#ffaf10]' : v.status === 'AVAILABLE' ? 'bg-green-100 text-green-700' : 'bg-blue-100 text-blue-700')}>
                     {v.status === 'MAINTENANCE' ? 'Mant.' : v.status === 'AVAILABLE' ? 'Disp.' : 'Alquilado'}
                   </div>
@@ -633,20 +654,55 @@ export default function App() {
               )}
               {tab === 'history' && (
                 <div>
+                  {/* Ajouter tâche manuelle */}
                   <div className="bg-[#abdee6]/20 rounded-lg p-3 mb-4">
-                    <input value={newMaintDesc} onChange={e => setNewMaintDesc(e.target.value)} placeholder="Trabajo realizado..." className="w-full border rounded-lg p-2 text-sm mb-2" />
+                    <p className="text-xs font-bold text-gray-600 mb-2">➕ Nueva tarea</p>
+                    <input value={newMaintDesc} onChange={e => setNewMaintDesc(e.target.value)} placeholder="Descripción de la tarea..." className="w-full border rounded-lg p-2 text-sm mb-2" />
                     <div className="flex gap-2">
-                      <input value={newMaintCost} onChange={e => setNewMaintCost(e.target.value)} placeholder="Coste" type="number" className="flex-1 border rounded-lg p-2 text-sm" />
-                      <button onClick={addMaintenance} disabled={saving || !newMaintDesc} className="px-4 py-2 bg-[#ffaf10] text-white rounded-lg text-sm disabled:opacity-50">Agregar</button>
+                      <input value={newMaintCost} onChange={e => setNewMaintCost(e.target.value)} placeholder="Coste €" type="number" className="flex-1 border rounded-lg p-2 text-sm" />
+                      <button onClick={addMaintenance} disabled={saving || !newMaintDesc} className="px-4 py-2 bg-[#ffaf10] text-white rounded-lg text-sm font-medium disabled:opacity-50">Agregar</button>
                     </div>
                   </div>
-                  {maintenance.length === 0 ? <div className="text-center py-6 text-gray-400 text-sm">Sin historial</div>
-                  : maintenance.map((m: any) => (
-                    <div key={m.id} className="bg-gray-50 rounded-lg p-3 mb-2">
-                      <div className="flex justify-between"><div className="font-medium text-sm">{m.description}</div><div className="text-xs text-gray-500">{formatDate(m.completedDate || m.scheduledDate)}</div></div>
-                      {m.cost > 0 && <div className="text-xs text-[#ffaf10] mt-1">Coste: {Number(m.cost).toFixed(2)}€</div>}
+
+                  {/* Tâches en attente */}
+                  {maintenance.filter((m: any) => m.status === 'SCHEDULED' || m.status === 'IN_PROGRESS').length > 0 && (
+                    <div className="mb-4">
+                      <p className="text-xs font-bold text-red-600 mb-2 uppercase">⚠️ Tareas pendientes</p>
+                      {maintenance.filter((m: any) => m.status === 'SCHEDULED' || m.status === 'IN_PROGRESS').map((m: any) => (
+                        <div key={m.id} className="bg-red-50 border border-red-200 rounded-lg p-3 mb-2">
+                          <div className="flex justify-between items-start">
+                            <div className="flex-1">
+                              <div className="font-medium text-sm">{m.description}</div>
+                              <div className="text-xs text-gray-500 mt-1">
+                                {m.priority === 'HIGH' || m.priority === 'URGENT' ? '🔴' : '🟡'} {m.priority || 'NORMAL'} · {formatDate(m.scheduledDate)}
+                                {m.description?.includes('auto') ? ' · 🤖 Auto' : ' · ✍️ Manual'}
+                              </div>
+                            </div>
+                            <button onClick={() => completeMaintenance(m.id)} disabled={saving} className="ml-2 px-3 py-1.5 bg-green-500 text-white rounded-lg text-xs font-bold disabled:opacity-50">✅ Validar</button>
+                          </div>
+                        </div>
+                      ))}
                     </div>
-                  ))}
+                  )}
+
+                  {/* Historique complété */}
+                  <p className="text-xs font-bold text-gray-500 mb-2 uppercase">📋 Historial completado</p>
+                  {maintenance.filter((m: any) => m.status === 'COMPLETED').length === 0
+                    ? <div className="text-center py-4 text-gray-400 text-sm">Sin historial</div>
+                    : maintenance.filter((m: any) => m.status === 'COMPLETED').map((m: any) => (
+                      <div key={m.id} className="bg-gray-50 rounded-lg p-3 mb-2">
+                        <div className="flex justify-between">
+                          <div className="font-medium text-sm">{m.description}</div>
+                          <div className="text-xs text-green-600 font-medium">✅</div>
+                        </div>
+                        <div className="text-xs text-gray-500 mt-1">
+                          {formatDate(m.completedAt || m.completedDate || m.scheduledDate)}
+                          {m.description?.includes('auto') ? ' · 🤖 Auto' : ' · ✍️ Manual'}
+                          {(m.totalCost || m.cost) > 0 ? ' · ' + Number(m.totalCost || m.cost).toFixed(2) + '€' : ''}
+                        </div>
+                      </div>
+                    ))
+                  }
                 </div>
               )}
               {tab === 'checklist' && (
