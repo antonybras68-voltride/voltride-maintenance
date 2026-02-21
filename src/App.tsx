@@ -41,8 +41,8 @@ function Login({ onLogin }: { onLogin: (user: any, token: string) => void }) {
       <div className="bg-white rounded-2xl shadow-2xl p-8 w-full max-w-md">
         <div className="text-center mb-6">
           <img src="https://res.cloudinary.com/dis5pcnfr/image/upload/v1769278425/IMG-20260111-WA0001_1_-removebg-preview_zzajxa.png" className="h-16 mx-auto mb-4" alt="Voltride" />
-          <h1 className="text-2xl font-bold text-gray-800">Maintenance Voltride</h1>
-          <p className="text-gray-500">Connectez-vous pour continuer</p>
+          <h1 className="text-2xl font-bold text-gray-800">Mantenimiento Voltride</h1>
+          <p className="text-gray-500">Conéctese para continuar</p>
         </div>
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
@@ -55,7 +55,7 @@ function Login({ onLogin }: { onLogin: (user: any, token: string) => void }) {
           </div>
           {error && <div className="bg-red-50 border border-red-200 rounded-lg p-3 text-red-600 text-sm">{error}</div>}
           <button type="submit" disabled={loading} className="w-full py-3 text-white font-semibold rounded-xl disabled:opacity-50" style={{ background: 'linear-gradient(135deg, #abdee6 0%, #ffaf10 100%)' }}>
-            {loading ? 'Conexión...' : 'Iniciar sesión'}
+            {loading ? 'Conectando...' : 'Iniciar sesión'}
           </button>
         </form>
       </div>
@@ -255,6 +255,26 @@ export default function App() {
   const filtered = filter === 'ALL' ? vehicles : filter === ('TODO' as any) ? vehicles.filter((v: any) => v.maintenanceRecords?.some((m: any) => m.status === 'SCHEDULED')) : vehicles.filter((v: any) => v.status === filter)
 
   const updateStatus = async (id: string, status: string) => {
+    // Si passage en maintenance, vérifier les réservations
+    if (status === 'MAINTENANCE') {
+      try {
+        const res = await fetch(API_URL + '/api/fleet/' + id + '/upcoming-bookings')
+        if (res.ok) {
+          const bookings = await res.json()
+          if (bookings.length > 0) {
+            const next = bookings[0]
+            const startDate = new Date(next.startDate).toLocaleDateString('es-ES')
+            const endDate = new Date(next.endDate).toLocaleDateString('es-ES')
+            const client = next.customer ? next.customer.firstName + ' ' + next.customer.lastName : 'Cliente'
+            const msg = '⚠️ ATENCIÓN: Este vehículo tiene ' + bookings.length + ' reserva(s) próxima(s):\n\n' +
+              '📅 Próxima: ' + startDate + ' → ' + endDate + '\n' +
+              '👤 Cliente: ' + client + '\n\n' +
+              '¿Quieres pasarlo a mantenimiento de todas formas?'
+            if (!confirm(msg)) return
+          }
+        }
+      } catch (e) { console.error(e) }
+    }
     setSaving(true)
     try {
       await fetch(API_URL + '/api/fleet/' + id, {
