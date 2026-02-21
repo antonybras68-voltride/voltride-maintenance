@@ -155,6 +155,19 @@ export default function App() {
     { id: 'clean', label: 'Limpieza general', checked: false },
   ]
 
+  // Pull-to-refresh
+  const [pullRefreshing, setPullRefreshing] = useState(false)
+  const pullStartY = useRef(0)
+  const handlePullStart = (e: any) => { pullStartY.current = e.touches[0].clientY }
+  const handlePullEnd = async (e: any) => {
+    const diff = e.changedTouches[0].clientY - pullStartY.current
+    if (diff > 100 && window.scrollY === 0 && !pullRefreshing) {
+      setPullRefreshing(true)
+      await loadVehicles()
+      setPullRefreshing(false)
+    }
+  }
+
   const loadVehicles = async () => {
     setLoading(true)
     try {
@@ -464,7 +477,8 @@ export default function App() {
   if (!user) return <Login onLogin={handleLogin} />
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-gray-50" onTouchStart={handlePullStart} onTouchEnd={handlePullEnd}>
+      {pullRefreshing && <div className="fixed top-0 left-0 right-0 z-[9999] flex justify-center py-2 bg-[#abdee6]"><div className="animate-spin text-xl">🔄</div></div>}
       <div className="text-white p-4 shadow-lg" style={{background: 'linear-gradient(135deg, #abdee6, #ffaf10)'}}>
         <div className="flex items-center gap-3 mb-2">
           <img src="https://res.cloudinary.com/dis5pcnfr/image/upload/v1769278425/IMG-20260111-WA0001_1_-removebg-preview_zzajxa.png" alt="Voltride" className="h-8" />
