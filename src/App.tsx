@@ -712,13 +712,18 @@ export default function App() {
                 <div>
                   <div className="flex justify-between items-center mb-3">
                     <p className="text-xs font-bold text-gray-500 uppercase">📋 Historial completo</p>
-                    <button onClick={() => {
-                      const rows = maintenance.filter((m: any) => m.status === 'COMPLETED').map((m: any) =>
-                        (m.completedAt || m.scheduledDate || '').substring(0,10) + ' | ' + m.description + ' | ' + (m.description?.includes('auto') ? 'Auto' : 'Manual') + ' | ' + Number(m.totalCost || 0).toFixed(2) + '€'
-                      )
-                      const text = 'HISTORIAL MANTENIMIENTO - ' + selectedVehicle.vehicleNumber + '\n' + getName(selectedVehicle.vehicle?.name) + '\n\nFecha | Descripción | Tipo | Coste\n' + rows.join('\n')
-                      navigator.clipboard.writeText(text).then(() => alert('Historial copiado al portapapeles'))
-                    }} className="px-3 py-1 bg-gray-200 text-gray-700 rounded text-xs font-medium hover:bg-gray-300">📋 Copiar</button>
+                    <div className="flex gap-1">
+                      <button onClick={() => {
+                        window.open(API_URL + '/api/fleet/' + selectedVehicle.id + '/maintenance-pdf', '_blank')
+                      }} className="px-3 py-1 bg-[#ffaf10] text-white rounded text-xs font-medium hover:bg-[#e09e00]">📄 PDF</button>
+                      <button onClick={() => {
+                        const rows = maintenance.filter((m: any) => m.status === 'COMPLETED').map((m: any) =>
+                          (m.completedAt || m.scheduledDate || '').substring(0,10) + ' | ' + m.description + ' | ' + (m.description?.includes('auto') ? 'Auto' : 'Manual') + ' | ' + Number(m.totalCost || 0).toFixed(2) + '€'
+                        )
+                        const text = 'HISTORIAL MANTENIMIENTO - ' + selectedVehicle.vehicleNumber + '\n' + getName(selectedVehicle.vehicle?.name) + '\n\nFecha | Descripción | Tipo | Coste\n' + rows.join('\n')
+                        navigator.clipboard.writeText(text).then(() => alert('Historial copiado al portapapeles'))
+                      }} className="px-3 py-1 bg-gray-200 text-gray-700 rounded text-xs font-medium hover:bg-gray-300">📋 Copiar</button>
+                    </div>
                   </div>
                   {maintenance.filter((m: any) => m.status === 'COMPLETED').length === 0
                     ? <div className="text-center py-6 text-gray-400 text-sm">Sin historial</div>
